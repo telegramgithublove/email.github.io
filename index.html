@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Верификация аккаунта</title>
+    <title>Подтвердите ваш email</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -13,33 +13,37 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-500 hover:shadow-xl">
+    <div id="app" class="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-500 hover:shadow-xl">
         <div class="flex flex-col items-center">
-            <!-- Logo container -->
+            <!-- Logo -->
             <div class="w-24 h-24 mb-6">
                 <img src="logo.png" alt="Логотип" class="w-full h-full object-contain">
             </div>
-            
-            <!-- Success icon -->
-            <div class="mb-6">
-                <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
 
-            <!-- Message content -->
-            <h1 class="text-2xl font-semibold text-gray-800 mb-4 text-center">
-                Ваш аккаунт успешно верифицирован!
+            <!-- Content -->
+            <h1 class="text-2xl font-semibold text-gray-800 mb-4 text-center" id="statusMessage">
+                Пожалуйста, подтвердите ваш email
             </h1>
-            
-            <p class="text-gray-600 text-center mb-8">
-                Теперь вы можете наслаждаться всеми функциями нашего приложения.
+
+            <p class="text-gray-600 text-center mb-8" id="statusDescription">
+                Чтобы завершить регистрацию, нажмите на кнопку ниже.
             </p>
 
-            <!-- Button -->
-            <a href="http://localhost:5173/login" 
+            <!-- Verification button -->
+            <a href="{{link}}" 
+               id="verifyButton"
                class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors duration-200 transform hover:scale-105">
-                <span>Log in</span>
+                <span>Подтвердить email</span>
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+            </a>
+
+            <!-- Login button -->
+            <a href="http://localhost:5173/login" 
+               id="loginButton"
+               class="hidden inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 transform hover:scale-105 mt-6">
+                <span>Перейти на страницу логина</span>
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                 </svg>
@@ -47,7 +51,19 @@
         </div>
     </div>
 
-    <!-- Optional: Add some decorative elements -->
-    <div class="fixed top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+    <script>
+        // Проверка верификации email
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailVerified = urlParams.get('verified'); // Ожидается параметр ?verified=true/false
+
+            if (emailVerified === 'true') {
+                document.getElementById('statusMessage').textContent = 'Ваш email успешно подтверждён!';
+                document.getElementById('statusDescription').textContent = 'Теперь вы можете войти в систему.';
+                document.getElementById('verifyButton').classList.add('hidden');
+                document.getElementById('loginButton').classList.remove('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
