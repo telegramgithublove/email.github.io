@@ -9,96 +9,118 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 1rem;
+        }
+        .success-icon {
+            animation: scale 0.5s ease-in-out;
+        }
+        @keyframes scale {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-4">
-    <div id="app" class="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 transform transition-all duration-500 hover:shadow-xl">
+<body>
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <div class="flex flex-col items-center">
-            <!-- Logo -->
-            <div class="w-24 h-24 mb-6">
-                <img src="logo.png" alt="Логотип" class="w-full h-full object-contain">
+            <!-- Success Icon -->
+            <div class="success-icon w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
             </div>
 
             <!-- Content -->
-            <h1 class="text-2xl font-semibold text-gray-800 mb-4 text-center" id="statusMessage">
+            <h1 id="statusMessage" class="text-2xl font-semibold text-gray-800 mb-2 text-center">
                 Подтверждение email
             </h1>
 
-            <p class="text-gray-600 text-center mb-8" id="statusDescription">
+            <p id="statusDescription" class="text-gray-600 text-center mb-8">
                 Проверяем статус подтверждения...
             </p>
 
-            <!-- Login button -->
+            <!-- Login Button -->
             <a href="http://localhost:5173/login" 
                id="loginButton"
-               class="hidden inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors duration-200 transform hover:scale-105">
-                <span>Войти в систему</span>
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                </svg>
+               class="hidden w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium text-center transform transition duration-200 hover:bg-indigo-700 hover:scale-105">
+                Войти в систему
             </a>
         </div>
     </div>
 
     <script type="module">
-        // Import Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getAuth, applyActionCode } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
-        // Firebase конфигурация
         const firebaseConfig = {
-            apiKey: "AIzaSyBZrWHoEv3CYxlZ5pKdRRU7JmZ5QbNrBHI",
+            apiKey: "AIzaSyA6Arlm9AtOH0MztTaY-dfHWFqFuxMLWRs",
             authDomain: "forum-e06cc.firebaseapp.com",
             databaseURL: "https://forum-e06cc-default-rtdb.firebaseio.com",
             projectId: "forum-e06cc",
-            storageBucket: "forum-e06cc.appspot.com",
-            messagingSenderId: "1068809831274",
-            appId: "1:1068809831274:web:9f3e6f40f3a8d47c4a7b4b"
+            storageBucket: "forum-e06cc.firebasestorage.app",
+            messagingSenderId: "183754251786",
+            appId: "1:183754251786:web:3ddfba5835aec64676c9f3",
+            measurementId: "G-0KYPB0WRFK"
         };
 
-        // Инициализация Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        window.addEventListener('load', async () => {
-            const statusMessage = document.getElementById('statusMessage');
-            const statusDescription = document.getElementById('statusDescription');
-            const loginButton = document.getElementById('loginButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const statusDescription = document.getElementById('statusDescription');
+        const loginButton = document.getElementById('loginButton');
+        const successIcon = document.querySelector('.success-icon');
 
+        async function handleVerification() {
             try {
-                // Получаем параметры из URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const mode = urlParams.get('mode');
                 const oobCode = urlParams.get('oobCode');
+
+                console.log('Verification parameters:', { mode, oobCode });
 
                 if (mode === 'verifyEmail' && oobCode) {
                     // Применяем код подтверждения
                     await applyActionCode(auth, oobCode);
                     
-                    statusMessage.textContent = 'Email успешно подтверждён!';
+                    // Показываем успешное подтверждение
+                    successIcon.style.display = 'flex';
+                    statusMessage.textContent = 'Email подтверждён!';
                     statusDescription.textContent = 'Теперь вы можете войти в систему и пользоваться всеми функциями форума.';
                     loginButton.classList.remove('hidden');
 
-                    // Обновляем статус пользователя
+                    // Проверяем статус пользователя
                     const user = auth.currentUser;
                     if (user) {
                         await user.reload();
-                        console.log('Email verification status:', user.emailVerified);
+                        console.log('Verification status:', user.emailVerified);
                     }
                 } else {
+                    // Показываем ошибку
+                    successIcon.style.display = 'none';
                     statusMessage.textContent = 'Ошибка подтверждения';
                     statusDescription.textContent = 'Неверная ссылка подтверждения. Пожалуйста, используйте ссылку из письма.';
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Verification error:', error);
+                
+                // Показываем ошибку
+                successIcon.style.display = 'none';
                 statusMessage.textContent = 'Ошибка подтверждения';
                 statusDescription.textContent = 'Произошла ошибка при подтверждении email. Возможно, ссылка устарела или уже была использована.';
-                
-                // Показываем кнопку для возврата на страницу входа
                 loginButton.classList.remove('hidden');
             }
-        });
+        }
+
+        // Запускаем проверку при загрузке страницы
+        window.addEventListener('load', handleVerification);
     </script>
 </body>
 </html>
