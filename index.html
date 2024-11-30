@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Подтвердите ваш email</title>
+    <title>Подтверждение email</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -22,28 +22,18 @@
 
             <!-- Content -->
             <h1 class="text-2xl font-semibold text-gray-800 mb-4 text-center" id="statusMessage">
-                Пожалуйста, подтвердите ваш email
+                Подтверждение email
             </h1>
 
             <p class="text-gray-600 text-center mb-8" id="statusDescription">
-                Чтобы завершить регистрацию, нажмите на кнопку ниже.
+                Проверяем статус подтверждения...
             </p>
-
-            <!-- Verification button -->
-            <a href="{{link}}" 
-               id="verifyButton"
-               class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors duration-200 transform hover:scale-105">
-                <span>Подтвердить email</span>
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                </svg>
-            </a>
 
             <!-- Login button -->
             <a href="http://localhost:5173/login" 
                id="loginButton"
-               class="hidden inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 transform hover:scale-105 mt-6">
-                <span>Перейти на страницу логина</span>
+               class="hidden inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors duration-200 transform hover:scale-105">
+                <span>Войти в систему</span>
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                 </svg>
@@ -51,17 +41,59 @@
         </div>
     </div>
 
-    <script>
-        // Проверка верификации email
-        window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const emailVerified = urlParams.get('verified'); // Ожидается параметр ?verified=true/false
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getAuth, applyActionCode } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
-            if (emailVerified === 'true') {
-                document.getElementById('statusMessage').textContent = 'Ваш email успешно подтверждён!';
-                document.getElementById('statusDescription').textContent = 'Теперь вы можете войти в систему.';
-                document.getElementById('verifyButton').classList.add('hidden');
-                document.getElementById('loginButton').classList.remove('hidden');
+        // Firebase конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZrWHoEv3CYxlZ5pKdRRU7JmZ5QbNrBHI",
+            authDomain: "forum-e06cc.firebaseapp.com",
+            databaseURL: "https://forum-e06cc-default-rtdb.firebaseio.com",
+            projectId: "forum-e06cc",
+            storageBucket: "forum-e06cc.appspot.com",
+            messagingSenderId: "1068809831274",
+            appId: "1:1068809831274:web:9f3e6f40f3a8d47c4a7b4b"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        window.addEventListener('load', async () => {
+            const statusMessage = document.getElementById('statusMessage');
+            const statusDescription = document.getElementById('statusDescription');
+            const loginButton = document.getElementById('loginButton');
+
+            try {
+                // Получаем код подтверждения из URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const actionCode = urlParams.get('oobCode');
+
+                if (actionCode) {
+                    // Применяем код подтверждения
+                    await applyActionCode(auth, actionCode);
+                    
+                    // Успешная верификация
+                    statusMessage.textContent = 'Email успешно подтверждён!';
+                    statusDescription.textContent = 'Теперь вы можете войти в систему и пользоваться всеми функциями форума.';
+                    loginButton.classList.remove('hidden');
+
+                    // Отправляем информацию об успешной верификации
+                    const user = auth.currentUser;
+                    if (user) {
+                        await user.reload();
+                        console.log('Email verified:', user.emailVerified);
+                    }
+                } else {
+                    statusMessage.textContent = 'Ошибка подтверждения';
+                    statusDescription.textContent = 'Неверная или устаревшая ссылка подтверждения. Проверьте, что вы используете актуальную ссылку из письма.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusMessage.textContent = 'Ошибка подтверждения';
+                statusDescription.textContent = 'Произошла ошибка при подтверждении email. Возможно, ссылка устарела или уже была использована.';
             }
         });
     </script>
