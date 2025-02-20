@@ -30,53 +30,52 @@
 <body>
     <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <div class="flex flex-col items-center">
-            <!-- Success Icon -->
             <div class="success-icon w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
                 <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
-
-            <!-- Content -->
             <h1 id="statusMessage" class="text-2xl font-semibold text-gray-800 mb-2 text-center">
                 Подтверждение email
             </h1>
-
             <p id="statusDescription" class="text-gray-600 text-center mb-8">
                 Проверяем статус подтверждения...
             </p>
-
-            <!-- Login Button -->
             <a href="http://localhost:5174/login" 
                id="loginButton"
-               class="hidden w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium text-center transform transition duration-200 hover:bg-indigo-700 hover:scale-105">
+               class="hidden w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium text-center transition duration-200 hover:bg-indigo-700 hover:scale-105">
                 Войти в систему
             </a>
+            <button id="tryAgainButton" class="hidden bg-red-600 text-white px-4 py-2 rounded-lg">
+                Попробовать снова
+            </button>
         </div>
     </div>
 
     <script type="module">
-          import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-          import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-analytics.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getAuth, applyActionCode } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-analytics.js";
 
-          const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyC-vJAy9Adce0C4ixxZPsuEdJLcmxJMB6k",
             authDomain: "forum-a36e8.firebaseapp.com",
             databaseURL: "https://forum-a36e8-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "forum-a36e8",
-            storageBucket: "forum-a36e8.firebasestorage.app",
+            storageBucket: "forum-a36e8.appspot.com",
             messagingSenderId: "783823450857",
             appId: "1:783823450857:web:0984ea46bb8d195c943678",
             measurementId: "G-99VV2G0ZZ7"
-          };
+        };
 
-          const app = initializeApp(firebaseConfig);
-          const analytics = getAnalytics(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app);
 
         const statusMessage = document.getElementById('statusMessage');
         const statusDescription = document.getElementById('statusDescription');
         const loginButton = document.getElementById('loginButton');
-        const successIcon = document.querySelector('.success-icon');
+        const tryAgainButton = document.getElementById('tryAgainButton');
 
         async function handleVerification() {
             try {
@@ -84,42 +83,20 @@
                 const mode = urlParams.get('mode');
                 const oobCode = urlParams.get('oobCode');
 
-                console.log('Verification parameters:', { mode, oobCode });
-
                 if (mode === 'verifyEmail' && oobCode) {
-                    // Применяем код подтверждения
                     await applyActionCode(auth, oobCode);
-                    
-                    // Показываем успешное подтверждение
-                    successIcon.style.display = 'flex';
                     statusMessage.textContent = 'Email подтверждён!';
-                    statusDescription.textContent = 'Теперь вы можете войти в систему и пользоваться всеми функциями форума.';
+                    statusDescription.textContent = 'Теперь вы можете войти в систему.';
                     loginButton.classList.remove('hidden');
-
-                    // Проверяем статус пользователя
-                    const user = auth.currentUser;
-                    if (user) {
-                        await user.reload();
-                        console.log('Verification status:', user.emailVerified);
-                    }
                 } else {
-                    // Показываем ошибку
-                    successIcon.style.display = 'none';
-                    statusMessage.textContent = 'Ошибка подтверждения';
-                    statusDescription.textContent = 'Неверная ссылка подтверждения. Пожалуйста, используйте ссылку из письма.';
+                    throw new Error('invalid_mode');
                 }
             } catch (error) {
-                console.error('Verification error:', error);
-                
-                // Показываем ошибку
-                successIcon.style.display = 'none';
                 statusMessage.textContent = 'Ошибка подтверждения';
-                statusDescription.textContent = 'Произошла ошибка при подтверждении email. Возможно, ссылка устарела или уже была использована.';
-                loginButton.classList.remove('hidden');
+                statusDescription.textContent = 'Неверная ссылка.';
             }
         }
 
-        // Запускаем проверку при загрузке страницы
         window.addEventListener('load', handleVerification);
     </script>
 </body>
