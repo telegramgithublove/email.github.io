@@ -47,7 +47,7 @@
             </p>
 
             <!-- Login Button -->
-            <a href="http://localhost:5173/login" 
+            <a href="http://localhost:5174/login" 
                id="loginButton"
                class="hidden w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium text-center transform transition duration-200 hover:bg-indigo-700 hover:scale-105">
                 Войти в систему
@@ -56,22 +56,22 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getAuth, applyActionCode } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+          import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+          import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-analytics.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA6Arlm9AtOH0MztTaY-dfHWFqFuxMLWRs",
-            authDomain: "forum-e06cc.firebaseapp.com",
-            databaseURL: "https://forum-e06cc-default-rtdb.firebaseio.com",
-            projectId: "forum-e06cc",
-            storageBucket: "forum-e06cc.firebasestorage.app",
-            messagingSenderId: "183754251786",
-            appId: "1:183754251786:web:3ddfba5835aec64676c9f3",
-            measurementId: "G-0KYPB0WRFK"
-        };
+          const firebaseConfig = {
+            apiKey: "AIzaSyC-vJAy9Adce0C4ixxZPsuEdJLcmxJMB6k",
+            authDomain: "forum-a36e8.firebaseapp.com",
+            databaseURL: "https://forum-a36e8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "forum-a36e8",
+            storageBucket: "forum-a36e8.firebasestorage.app",
+            messagingSenderId: "783823450857",
+            appId: "1:783823450857:web:0984ea46bb8d195c943678",
+            measurementId: "G-99VV2G0ZZ7"
+          };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+          const app = initializeApp(firebaseConfig);
+          const analytics = getAnalytics(app);
 
         const statusMessage = document.getElementById('statusMessage');
         const statusDescription = document.getElementById('statusDescription');
