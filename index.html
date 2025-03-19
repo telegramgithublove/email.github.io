@@ -83,17 +83,40 @@
                 const mode = urlParams.get('mode');
                 const oobCode = urlParams.get('oobCode');
 
-                if (mode === 'verifyEmail' && oobCode) {
-                    await applyActionCode(auth, oobCode);
-                    statusMessage.textContent = 'Email подтверждён!';
-                    statusDescription.textContent = 'Теперь вы можете войти в систему.';
-                    loginButton.classList.remove('hidden');
-                } else {
-                    throw new Error('invalid_mode');
+                // Логируем параметры для диагностики
+                console.log("Параметры URL:", { mode, oobCode });
+
+                if (!oobCode) {
+                    statusMessage.textContent = 'Ошибка подтверждения';
+                    statusDescription.textContent = 'Отсутствует код верификации.';
+                    tryAgainButton.classList.remove('hidden');
+                    return;
                 }
+                if (mode !== 'verifyEmail') {
+                    statusMessage.textContent = 'Ошибка подтверждения';
+                    statusDescription.textContent = `Неверный тип действия (ожидался verifyEmail, получен: ${mode}).`;
+                    tryAgainButton.classList.remove('hidden');
+                    return;
+                }
+
+                console.log("Попытка верификации email с oobCode:", oobCode);
+                await applyActionCode(auth, oobCode);
+                console.log("Верификация успешна");
+
+                statusMessage.textContent = 'Email подтверждён!';
+                statusDescription.textContent = 'Теперь вы можете войти в систему.';
+                loginButton.classList.remove('hidden');
             } catch (error) {
+                console.error("Ошибка верификации:", error);
                 statusMessage.textContent = 'Ошибка подтверждения';
-                statusDescription.textContent = 'Неверная ссылка.';
+                if (error.code === 'auth/invalid-action-code') {
+                    statusDescription.textContent = 'Ссылка недействительна или истёк срок действия.';
+                } else if (error.code === 'auth/expired-action-code') {
+                    statusDescription.textContent = 'Срок действия ссылки истёк.';
+                } else {
+                    statusDescription.textContent = `Ошибка: ${error.message}`;
+                }
+                tryAgainButton.classList.remove('hidden');
             }
         }
 
